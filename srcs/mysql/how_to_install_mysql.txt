@@ -1,0 +1,177 @@
+
+# How To Install Mysql Service :
+
+# Time to install Mysql Server without prompt (cuz it will ask for a password to be entered in the console).
+#			$ apt-get install mysql   :// wont work cuz the repository of mysql does NOT exist on debian.
+
+
+################################### COMMAND LINE INSTALLATION #################################################
+#
+# STEPS FOR A FRESH Installation of MySQL :
+
+# 1- Adding the MySQL APT Repository :
+#
+#   Add the MySQL APT repository to your system's software repository list.
+#			$ wget http://repo.mysql.com/mysql-apt-config_0.8.13-1_all.deb
+
+# 	// How do I use wget :
+#			$ apt-get install wget -y
+
+#		Copy the URL for a file you'd like to download in your browser.
+#		Now head back to the Terminal and type "wget" followed by the pasted URL.
+#		The file will download, and you'll see progress in realtime as it does.
+#
+#	==> GNU Wget is a computer program that retrieves content from web servers.
+
+
+#	//	Release Package :
+#		==> release : allow or enable to set free.
+#					the action or process of releasing product to be available.
+#		==> A "Release Package" is a set of configuration items that will be build, tested and deployed together as
+#				a single release.
+
+
+# Follow these steps:
+
+#	a- Go to the download page for the MySQL APT repository at http://repo.mysql.com/mysql-apt-config_0.8.13-1_all.deb.
+
+#	b- Select and download the release package for your Linux distribution.
+
+#	c- Instal the download release package with the following command, "dpkg -i " with the name of the downloaded package.
+
+#	d- During the installation of the packages, you will be asked to choose the versions of the MySQL server
+#      and other components that you want to install, and after making the choices for all components, choose OK to finish
+#		the configuration and installation of the release package.
+
+#	e- Update package information form the MySQL APT repository with the following command :
+#			 $ apt-get update
+#
+# ==> Once the MySQL APT repository is enabled on your system, you will no longer be able to install any MySQL packages from
+#		your platform's native software repositories until the MySQL APT repository is disabled.
+#
+
+
+# 2- Installing MySQL with APT :
+
+# Install MySQL by the following command :
+#			$ apt-get install mysql-server
+
+# ==> This command installs the package for the MySQL server, as well as the package for the client and for the database common file.
+# ==> During the installation, you are asked to supply a password for the root user for your MySQL installtion.
+# --> Make sure you remember the root password you set.
+
+
+# 3- Starting and Stopping the MySQL Server :
+
+# The MySQL server is started automatically after installation.
+# You can check the status of the MySQL server with the following command :
+#			$ service mysql status  or $ service --status-all
+#
+###########################################################################################################################
+
+########################################## NONINTERACTIVE MODE ###########################################################
+#
+# We gonna use deb-conf for noninteractive mode installation.
+
+# STEPS FOR NONINTERACTIVE Installation of MySQL :
+
+#	$ apt-get install wget -y
+
+#	$ wget http://repo.mysql.com/mysql-apt-config_0.8.13-1_all.deb
+
+#	$ apt-get install lsb-release -y
+
+#	$ apt-get install gnupg -y
+
+#	$ dpkg -i mysql-apt-config_0.8.13-1_all.deb
+
+#	$ apt-get update
+
+#	$ apt-get install mysql-server
+
+
+# Use debconf :
+
+#	After configuration "mysql" for first time, we can use "debconf-get-selections" to get the preconfiguration of the software from debconf database.
+
+# 	It is provided by debconf-utils package, so you need to install it manually.
+
+#	debconf: delaying package configuration, since apt-utils is not installed.
+
+#	We can install the debconf-get-selections tool to see what possible selections a package may have.
+
+#			$ apt-get install -y debconf-utils
+#
+#	Then find debconf related to MySQL:
+
+#			$ debconf-get-selections | grep mysql
+
+# ==> We'll see a few listed, including the configuration used for setting the root password.
+# This is useful for installing any package that may have prompts or configuration asked. They can be set ahead of time!
+
+#
+#####################################################################################################################
+
+
+===> AFTER getting the preconfiguration answers for installtion, you can run your script and it will work just as expected:
+
+
+  $ apt-get install wget -y
+
+  $ apt-get install lsb-release -y
+
+  $ apt-get install gnupg -y
+
+
+# You will need debconf-get-selections on a source system on which you want to read values from the debconf database.
+
+# debconf-set-selections : Insert new values into the debconf database.
+
+  $ apt-get install -y debconf-utils
+
+
+### DON'T USE "ENV DEBIAN_FRONTEND noninteractive" on the Dockerfile ###
+
+	# $ export DEBIAN_FRONTEND=noninteractive
+
+# $ debconf-set-selections <<< "mysql-community-server	mysql-community-server/re-root-pass	password"
+# $ debconf-set-selections <<< "mysql-community-server	mysql-community-server/root-pass	password"
+# $ debconf-set-selections <<< "mysql-apt-config	mysql-apt-config/repo-url	string	http://repo.mysql.com/apt"
+# $ debconf-set-selections <<< "mysql-apt-config	mysql-apt-config/select-preview	select	Disabled"
+# $ debconf-set-selections <<< "mysql-community-server	mysql-community-server/data-dir	note"
+
+# Choices: mysql-5.7, mysql-8.0, mysql-cluster-7.5, mysql-cluster-7.6, mysql-cluster-8.0, None
+# $ debconf-set-selections <<< "mysql-apt-config	mysql-apt-config/select-server	select	mysql-5.7"
+# $ debconf-set-selections <<< "mysql-apt-config	mysql-apt-config/select-tools	select	Enabled"
+# $ debconf-set-selections <<< "mysql-apt-config	mysql-apt-config/unsupported-platform	select	abort"
+
+# Choices: MySQL Server & Cluster (Currently selected: mysql-5.7), MySQL Tools & Connectors (Currently selected: Enabled), MySQL Preview Packages (Currently selected: Disabled), Ok
+# $ debconf-set-selections <<< "mysql-apt-config	mysql-apt-config/select-product	select	Ok"
+# $ debconf-set-selections <<< "mysql-apt-config	mysql-apt-config/preview-component	string"
+# $ debconf-set-selections <<< "mysql-community-server	mysql-community-server/remove-data-dir	boolean	false"
+# $ debconf-set-selections <<< "mysql-apt-config	mysql-apt-config/repo-codename	select	buster"
+# $ debconf-set-selections <<< "mysql-community-server	mysql-community-server/root-pass-mismatch	error"
+# $ debconf-set-selections <<< "mysql-apt-config	mysql-apt-config/tools-component	string	mysql-tools"
+# $ debconf-set-selections <<< "mysql-apt-config	mysql-apt-config/dmr-warning	note"
+# $ debconf-set-selections <<< "mysql-apt-config	mysql-apt-config/repo-distro	select	debian"
+
+
+  $ wget http://repo.mysql.com/mysql-apt-config_0.8.13-1_all.deb
+
+
+# dpkg is used to install, remove, and inspect .deb software packages.
+
+# The -i flag indicates that we’d like to install from the specified file.
+
+  $ dpkg -i mysql-apt-config_0.8.13-1_all.deb
+
+
+  $ apt-get update
+
+  $ apt-get install mysql-server
+
+##	==> If this error show up, while you wanna access to mysql shell:
+##			"ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (2)"
+##	==> That's mean that u have forget to start mysql using this command : "service mysql nginx"
+
+  $ service mysql start
